@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 512 512"
+     width="512" height="512"
+     role="img" aria-label="ZCombine">
+
+  <title>ZCombine</title>
+  <desc>
+    A gradient-filled Z on the right with a clean four-point sparkle at
+    its center. Three file documents on the left flow into it through
+    glowing streams. Layered aurora glows and soft shadows give depth.
+  </desc>
+
+  <defs>
+    <!-- ===== Background ===== -->
+    <linearGradient id="zcm-bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0"    stop-color="#171F38"/>
+      <stop offset="0.55" stop-color="#10162A"/>
+      <stop offset="1"    stop-color="#080B16"/>
+    </linearGradient>
+
+    <!-- Aurora layer 1: violet, top-left -->
+    <radialGradient id="zcm-aurora-1" cx="20%" cy="25%" r="55%">
+      <stop offset="0" stop-color="#7C5CFF" stop-opacity="0.45"/>
+      <stop offset="1" stop-color="#7C5CFF" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Aurora layer 2: teal, bottom-right -->
+    <radialGradient id="zcm-aurora-2" cx="80%" cy="80%" r="55%">
+      <stop offset="0" stop-color="#00E0B8" stop-opacity="0.30"/>
+      <stop offset="1" stop-color="#00E0B8" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Aurora layer 3: violet accent, mid-right -->
+    <radialGradient id="zcm-aurora-3" cx="88%" cy="35%" r="42%">
+      <stop offset="0" stop-color="#A48CFF" stop-opacity="0.35"/>
+      <stop offset="1" stop-color="#A48CFF" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- ===== Brand gradients ===== -->
+    <linearGradient id="zcm-z" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0"    stop-color="#C4B5FF"/>
+      <stop offset="0.35" stop-color="#8B72FF"/>
+      <stop offset="0.75" stop-color="#7C5CFF"/>
+      <stop offset="1"    stop-color="#00E0B8"/>
+    </linearGradient>
+
+    <linearGradient id="zcm-z-shine" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0"   stop-color="#FFFFFF" stop-opacity="0.35"/>
+      <stop offset="0.4" stop-color="#FFFFFF" stop-opacity="0.05"/>
+      <stop offset="1"   stop-color="#000000" stop-opacity="0.15"/>
+    </linearGradient>
+
+    <linearGradient id="zcm-file" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0"   stop-color="#B7A5FF"/>
+      <stop offset="0.7" stop-color="#8B72FF"/>
+      <stop offset="1"   stop-color="#6A4FE0"/>
+    </linearGradient>
+
+    <linearGradient id="zcm-flow" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0"   stop-color="#7C5CFF" stop-opacity="0.15"/>
+      <stop offset="0.6" stop-color="#7C5CFF" stop-opacity="0.7"/>
+      <stop offset="1"   stop-color="#00E0B8" stop-opacity="1"/>
+    </linearGradient>
+
+    <!-- Sparkle glow -->
+    <radialGradient id="zcm-sparkle-glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0"    stop-color="#FFFFFF" stop-opacity="1"/>
+      <stop offset="0.25" stop-color="#E8DFFF" stop-opacity="0.85"/>
+      <stop offset="0.55" stop-color="#B4A2FF" stop-opacity="0.4"/>
+      <stop offset="1"    stop-color="#7C5CFF" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Star gradient: pure white → soft lavender -->
+    <linearGradient id="zcm-star" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#DCCFFF"/>
+    </linearGradient>
+
+    <!-- ===== Filters ===== -->
+    <filter id="zcm-soft" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="6"/>
+      <feOffset dy="5"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.55"/></feComponentTransfer>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+
+    <filter id="zcm-bloom" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur stdDeviation="10" result="b"/>
+      <feMerge>
+        <feMergeNode in="b"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <filter id="zcm-line-glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="3.5" result="b"/>
+      <feMerge>
+        <feMergeNode in="b"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Subtle dot grid pattern -->
+    <pattern id="zcm-dots" x="0" y="0" width="32" height="32"
+             patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="0.9" fill="#FFFFFF" opacity="0.05"/>
+    </pattern>
+  </defs>
+
+  <!-- ===== Background ===== -->
+  <rect width="512" height="512" rx="112" fill="url(#zcm-bg)"/>
+
+  <rect width="512" height="512" rx="112" fill="url(#zcm-aurora-1)"/>
+  <rect width="512" height="512" rx="112" fill="url(#zcm-aurora-2)"/>
+  <rect width="512" height="512" rx="112" fill="url(#zcm-aurora-3)"/>
+
+  <rect width="512" height="512" rx="112" fill="url(#zcm-dots)"/>
+
+  <!-- Hairline borders for a soft "card" frame -->
+  <rect x="1.5" y="1.5" width="509" height="509" rx="110.5"
+        fill="none" stroke="#FFFFFF" stroke-opacity="0.06" stroke-width="2"/>
+  <rect x="6" y="6" width="500" height="500" rx="106"
+        fill="none" stroke="#000000" stroke-opacity="0.35" stroke-width="1.5"/>
+
+  <!-- ===== Left: 3 input files ===== -->
+  <g filter="url(#zcm-soft)">
+
+    <!-- Top file -->
+    <g transform="translate(56 128) rotate(-10 55 62)">
+      <path d="M 0 12 Q 0 0 12 0 L 76 0 L 108 32 L 108 112 Q 108 124 96 124 L 12 124 Q 0 124 0 112 Z"
+            fill="url(#zcm-file)"/>
+      <path d="M 4 14 Q 4 4 14 4 L 74 4 L 104 34 L 104 110 Q 104 120 94 120 L 14 120 Q 4 120 4 110 Z"
+            fill="none" stroke="#FFFFFF" stroke-opacity="0.35" stroke-width="1.5"/>
+      <path d="M 76 0 L 76 32 L 108 32" fill="none"
+            stroke="#0A0E1A" stroke-opacity="0.6" stroke-width="2.5"
+            stroke-linejoin="round"/>
+      <g stroke="#0A0E1A" stroke-opacity="0.35" stroke-width="4" stroke-linecap="round">
+        <line x1="16" y1="58" x2="74" y2="58"/>
+        <line x1="16" y1="76" x2="86" y2="76"/>
+        <line x1="16" y1="94" x2="60" y2="94"/>
+      </g>
+    </g>
+
+    <!-- Middle file -->
+    <g transform="translate(56 194)">
+      <path d="M 0 12 Q 0 0 12 0 L 76 0 L 108 32 L 108 112 Q 108 124 96 124 L 12 124 Q 0 124 0 112 Z"
+            fill="url(#zcm-file)"/>
+      <path d="M 4 14 Q 4 4 14 4 L 74 4 L 104 34 L 104 110 Q 104 120 94 120 L 14 120 Q 4 120 4 110 Z"
+            fill="none" stroke="#FFFFFF" stroke-opacity="0.35" stroke-width="1.5"/>
+      <path d="M 76 0 L 76 32 L 108 32" fill="none"
+            stroke="#0A0E1A" stroke-opacity="0.6" stroke-width="2.5"
+            stroke-linejoin="round"/>
+      <g stroke="#0A0E1A" stroke-opacity="0.35" stroke-width="4" stroke-linecap="round">
+        <line x1="16" y1="58" x2="74" y2="58"/>
+        <line x1="16" y1="76" x2="86" y2="76"/>
+        <line x1="16" y1="94" x2="60" y2="94"/>
+      </g>
+    </g>
+
+    <!-- Bottom file -->
+    <g transform="translate(56 260) rotate(10 55 62)">
+      <path d="M 0 12 Q 0 0 12 0 L 76 0 L 108 32 L 108 112 Q 108 124 96 124 L 12 124 Q 0 124 0 112 Z"
+            fill="url(#zcm-file)"/>
+      <path d="M 4 14 Q 4 4 14 4 L 74 4 L 104 34 L 104 110 Q 104 120 94 120 L 14 120 Q 4 120 4 110 Z"
+            fill="none" stroke="#FFFFFF" stroke-opacity="0.35" stroke-width="1.5"/>
+      <path d="M 76 0 L 76 32 L 108 32" fill="none"
+            stroke="#0A0E1A" stroke-opacity="0.6" stroke-width="2.5"
+            stroke-linejoin="round"/>
+      <g stroke="#0A0E1A" stroke-opacity="0.35" stroke-width="4" stroke-linecap="round">
+        <line x1="16" y1="58" x2="74" y2="58"/>
+        <line x1="16" y1="76" x2="86" y2="76"/>
+        <line x1="16" y1="94" x2="60" y2="94"/>
+      </g>
+    </g>
+
+  </g>
+
+  <!-- ===== Flow lines: files → Z ===== -->
+  <g fill="none" stroke="url(#zcm-flow)" stroke-width="12"
+     stroke-linecap="round" opacity="0.35" filter="url(#zcm-line-glow)">
+    <path d="M 172 186 Q 215 210 258 234"/>
+    <path d="M 172 256 L 258 256"/>
+    <path d="M 172 326 Q 215 302 258 278"/>
+  </g>
+  <g fill="none" stroke="url(#zcm-flow)" stroke-width="6"
+     stroke-linecap="round">
+    <path d="M 172 186 Q 215 210 258 234"/>
+    <path d="M 172 256 L 258 256"/>
+    <path d="M 172 326 Q 215 302 258 278"/>
+  </g>
+
+  <!-- Source dots -->
+  <g fill="#7C5CFF" filter="url(#zcm-bloom)">
+    <circle cx="172" cy="186" r="5"/>
+    <circle cx="172" cy="256" r="5"/>
+    <circle cx="172" cy="326" r="5"/>
+  </g>
+  <g fill="#D6CCFF">
+    <circle cx="172" cy="186" r="2"/>
+    <circle cx="172" cy="256" r="2"/>
+    <circle cx="172" cy="326" r="2"/>
+  </g>
+
+  <!-- Target dots -->
+  <g fill="#00E0B8" filter="url(#zcm-bloom)">
+    <circle cx="258" cy="234" r="5"/>
+    <circle cx="258" cy="256" r="5"/>
+    <circle cx="258" cy="278" r="5"/>
+  </g>
+  <g fill="#D6FFF5">
+    <circle cx="258" cy="234" r="2"/>
+    <circle cx="258" cy="256" r="2"/>
+    <circle cx="258" cy="278" r="2"/>
+  </g>
+
+  <!-- ===== The Z brand ===== -->
+  <g filter="url(#zcm-bloom)" opacity="0.55">
+    <path d="M 274 122 L 452 122 L 274 390 L 452 390"
+          fill="none" stroke="#7C5CFF" stroke-width="72"
+          stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <g filter="url(#zcm-soft)" fill="none" stroke="url(#zcm-z)"
+     stroke-width="72" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 274 122 L 452 122 L 274 390 L 452 390"/>
+  </g>
+  <g fill="none" stroke="url(#zcm-z-shine)"
+     stroke-width="72" stroke-linecap="round" stroke-linejoin="round"
+     opacity="0.55">
+    <path d="M 274 122 L 452 122 L 274 390 L 452 390"/>
+  </g>
+  <g fill="none" stroke="#FFFFFF" stroke-opacity="0.35"
+     stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 300 122 L 452 122 L 292 390 L 434 390"/>
+  </g>
+
+  <!-- ===== AI sparkle at the center of the Z ===== -->
+  <!-- Single clean four-point star. No inner layer, no pupil, no ring. -->
+  <g transform="translate(363 256)">
+
+    <!-- Wide soft glow -->
+    <circle r="82" fill="url(#zcm-sparkle-glow)" opacity="0.55"/>
+    <!-- Tight glow -->
+    <circle r="46" fill="url(#zcm-sparkle-glow)" filter="url(#zcm-bloom)"/>
+
+    <!-- The one and only four-point star -->
+    <path d="M 0 -40
+             C 2 -14 14 -2 40 0
+             C 14 2 2 14 0 40
+             C -2 14 -14 2 -40 0
+             C -14 -2 -2 -14 0 -40 Z"
+          fill="url(#zcm-star)"
+          filter="url(#zcm-bloom)"/>
+  </g>
+
+</svg>

@@ -1,54 +1,171 @@
-name: Build and Package ZCombine
+name: Build and Release
 
 on:
   release:
     types: [published]
-  workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
-  build:
+  # ==========================================================================
+  # Windows — Python 3.8 (last release with Windows 7 SP1 support)
+  # ==========================================================================
+  build-windows:
+    name: Build Windows
     runs-on: windows-latest
-    
-    permissions:
-      contents: write
 
     steps:
-    - name: Checkout Code
-      uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.10'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.8"
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install pyinstaller 
-        pip install -r requirements.txt
+      - name: Install dependencies
+        shell: pwsh
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pyinstaller pillow
 
-    # Step 1: Build the main application (zcm.exe)
-    # Bundle the template and the icon file so they can be found at runtime.
-    - name: Build Main Application (zcm.exe)
-      run: |
-        pyinstaller --onefile --name zcm --icon icon.ico --collect-all customtkinter --add-data "zcm-template.bat;." --add-data "icon.ico;." zcm.py
+      - name: Build zcm.exe
+        shell: pwsh
+        run: |
+          pyinstaller --onefile --console --icon=icon.ico --name zcm `
+            --collect-all customtkinter `
+            --collect-submodules zcm `
+            --add-data "icon.ico;." `
+            main.py
 
-    # Step 2: Build the Installer (zcm-setup.exe)
-    # Bundle the compiled zcm.exe, the uninstall.bat, and the template for installation.
-    - name: Build Setup Installer (zcm-setup.exe)
-      run: |
-        pyinstaller --onefile --name zcm-setup --icon icon.ico --add-data "dist\zcm.exe;." --add-data "uninstall.bat;." --add-data "zcm-template.bat;." installer.py
+      - name: Build zcm-setup.exe
+        shell: pwsh
+        run: |
+          pyinstaller --onefile --console --icon=icon.ico --name zcm-setup `
+            --collect-submodules installer `
+            --add-data "dist/zcm.exe;payload" `
+            --add-data "installer/uninstall/windows.bat;payload" `
+            --add-data "icon.ico;payload" `
+            installer.py
 
-    # Step 3: Upload the installer as a workflow artifact (for testing)
-    - name: Upload Installer Artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: ZCombine-Installer
-        path: dist/zcm-setup.exe
+      - name: Prepare portable build
+        shell: pwsh
+        run: |
+          # Standalone binary — same file the installer copies, renamed
+          # for clarity on the Releases page.
+          Copy-Item dist/zcm.exe dist/zcm-portable.exe
 
-    # Step 4: Attach the installer to the GitHub Release (if triggered by a release)
-    - name: Upload to GitHub Release
-      uses: softprops/action-gh-release@v2
-      if: startsWith(github.ref, 'refs/tags/')
-      with:
-        files: dist/zcm-setup.exe
+      - name: Verify
+        shell: pwsh
+        run: |
+          Get-ChildItem dist
+          if (!(Test-Path "dist/zcm.exe"))          { throw "dist/zcm.exe missing" }
+          if (!(Test-Path "dist/zcm-setup.exe"))    { throw "dist/zcm-setup.exe missing" }
+          if (!(Test-Path "dist/zcm-portable.exe")) { throw "dist/zcm-portable.exe missing" }
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/zcm-setup.exe
+            dist/zcm-portable.exe
+
+  # ==========================================================================
+  # Linux — Python 3.8 inside python:3.8-slim-bullseye (glibc 2.31)
+  #
+  # Bullseye is EOL and its security pool has been pruned, which caused
+  # 404s on `apt-get install`. We pin apt to a fixed Debian snapshot,
+  # where every package version is preserved forever. This makes the
+  # build reproducible even after Bullseye is removed from the live
+  # mirrors entirely.
+  # ==========================================================================
+  build-linux:
+    name: Build Linux
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build inside python:3.8-slim-bullseye (snapshot.debian.org)
+        run: |
+          docker run --rm \
+            -v "$PWD:/src" \
+            -w /src \
+            python:3.8-slim-bullseye \
+            bash -c "
+              set -e
+
+              # --- 1) Point apt at an immutable Debian snapshot ---------
+              rm -f /etc/apt/sources.list
+              find /etc/apt/sources.list.d -type f -delete 2>/dev/null || true
+
+              printf 'deb http://snapshot.debian.org/archive/debian/20240101T000000Z bullseye main\n'          >  /etc/apt/sources.list
+              printf 'deb http://snapshot.debian.org/archive/debian-security/20240101T000000Z bullseye-security main\n' >> /etc/apt/sources.list
+
+              # Snapshots carry an expired Valid-Until header.
+              printf 'Acquire::Check-Valid-Until \"false\";\nAcquire::Retries \"3\";\n' > /etc/apt/apt.conf.d/99snapshot
+
+              # --- 2) Runtime libraries for Tk / CustomTkinter ----------
+              apt-get update
+              apt-get install -y --no-install-recommends \
+                tk8.6 libtk8.6 libtcl8.6 \
+                libx11-6 libxext6 libxrender1 \
+                binutils file
+
+              # --- 3) Python dependencies -------------------------------
+              python -m pip install --upgrade pip wheel
+              python -m pip install pyinstaller pillow
+              python -m pip install -r requirements.txt
+
+              # --- 4) Main binary ---------------------------------------
+              # Bundle both icons: the runtime picks .png on Linux and
+              # .ico on Windows, so having both keeps behaviour consistent.
+              python -m PyInstaller --onefile --console \
+                --name zcm \
+                --collect-all customtkinter \
+                --collect-submodules zcm \
+                --add-data 'icon.png:.' \
+                --add-data 'icon.ico:.' \
+                main.py
+
+              # --- 5) Setup installer (bundles dist/zcm as payload) -----
+              # The Linux installer looks for payload/icon.png first
+              # (see installer/common.py: SRC_ICON_LINUX = 'icon.png'),
+              # so we must ship the .png inside the payload folder.
+              python -m PyInstaller --onefile --console \
+                --name zcm-setup \
+                --collect-submodules installer \
+                --add-data 'dist/zcm:payload' \
+                --add-data 'installer/uninstall/linux.sh:payload' \
+                --add-data 'icon.png:payload' \
+                --add-data 'icon.ico:payload' \
+                installer.py
+
+              # --- 6) Portable copy -------------------------------------
+              cp dist/zcm dist/zcm-portable
+
+              chmod +x dist/zcm dist/zcm-setup dist/zcm-portable
+            "
+
+          # Files were created as root inside the container — fix ownership
+          # so the artifact uploader can read them.
+          sudo chown -R "$(id -u):$(id -g)" dist/
+
+      - name: Verify build outputs
+        run: |
+          ls -la dist/
+          test -f dist/zcm          || { echo "dist/zcm missing";          exit 1; }
+          test -f dist/zcm-setup    || { echo "dist/zcm-setup missing";    exit 1; }
+          test -f dist/zcm-portable || { echo "dist/zcm-portable missing"; exit 1; }
+          file dist/zcm dist/zcm-setup dist/zcm-portable
+
+      - name: Show required GLIBC symbols
+        run: |
+          readelf --version-info dist/zcm 2>/dev/null \
+            | grep -oE 'GLIBC_[0-9.]+' \
+            | sort -uV | tail -5 || true
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/zcm-setup
+            dist/zcm-portable
